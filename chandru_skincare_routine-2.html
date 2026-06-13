@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chandru - Skincare Routine</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f0f4f8;
+    color: #1a1a2e;
+    min-height: 100vh;
+  }
+  header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+    color: white;
+    padding: 20px 16px 16px;
+    text-align: center;
+  }
+  header h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: 1px; }
+  header p { font-size: 0.8rem; opacity: 0.75; margin-top: 4px; }
+  .date-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #16213e;
+    color: white;
+    padding: 10px;
+    gap: 16px;
+    font-size: 0.95rem;
+  }
+  .date-nav button {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  .date-nav button:hover { background: rgba(255,255,255,0.3); }
+  #dateDisplay { font-weight: 700; min-width: 180px; text-align: center; }
+
+  .section-title {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #0f3460;
+    padding: 14px 16px 6px;
+    border-bottom: 2px solid #0f3460;
+    margin: 0 12px;
+  }
+
+  .card {
+    background: white;
+    border-radius: 12px;
+    margin: 8px 12px;
+    padding: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+    position: relative;
+  }
+  .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.13); }
+  .card.done { opacity: 0.5; }
+  .card.done .card-name { text-decoration: line-through; }
+
+  .checkbox {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2.5px solid #0f3460;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    margin-top: 2px;
+    transition: all 0.2s;
+  }
+  .card.done .checkbox {
+    background: #0f3460;
+    color: white;
+    border-color: #0f3460;
+  }
+
+  .card-body { flex: 1; }
+  .card-name { font-weight: 700; font-size: 0.88rem; color: #1a1a2e; }
+  .card-freq {
+    font-size: 0.72rem;
+    color: white;
+    background: #e94560;
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 10px;
+    margin: 3px 0 4px;
+    font-weight: 600;
+  }
+  .card-freq.green { background: #2ecc71; }
+  .card-freq.blue { background: #3498db; }
+  .card-freq.purple { background: #8e44ad; }
+  .card-freq.orange { background: #e67e22; }
+
+  .card-inst {
+    font-size: 0.75rem;
+    color: #555;
+    line-height: 1.4;
+  }
+
+  .pill-card {
+    background: linear-gradient(135deg, #fff9e6, #fff3cc);
+    border-left: 4px solid #f39c12;
+  }
+  .pill-name { color: #b7770d; }
+  .duration-badge {
+    font-size: 0.7rem;
+    background: #f39c12;
+    color: white;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+    display: inline-block;
+    margin: 3px 0 4px;
+  }
+
+  .today-banner {
+    background: #e94560;
+    color: white;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 6px;
+    letter-spacing: 1px;
+  }
+
+  .section-group { margin-bottom: 8px; }
+
+  .tabs {
+    display: flex;
+    background: #16213e;
+    overflow-x: auto;
+  }
+  .tab {
+    flex: 1;
+    padding: 10px 6px;
+    text-align: center;
+    color: rgba(255,255,255,0.6);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+    min-width: 60px;
+  }
+  .tab.active {
+    color: white;
+    border-bottom: 3px solid #e94560;
+  }
+
+  .tab-content { display: none; padding-bottom: 80px; }
+  .tab-content.active { display: block; }
+
+  .progress-bar-wrap {
+    background: white;
+    margin: 8px 12px;
+    border-radius: 12px;
+    padding: 12px 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  }
+  .progress-label { font-size: 0.75rem; color: #555; margin-bottom: 6px; }
+  .progress-bar {
+    height: 10px;
+    background: #eee;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0f3460, #e94560);
+    border-radius: 10px;
+    transition: width 0.5s;
+  }
+  .progress-count { font-size: 0.8rem; font-weight: 700; color: #0f3460; margin-top: 4px; }
+
+  .note-box {
+    background: #fff9e6;
+    border-left: 4px solid #f39c12;
+    margin: 8px 12px;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 0.78rem;
+    color: #7d5a00;
+    line-height: 1.5;
+  }
+  .note-box strong { display: block; margin-bottom: 2px; font-size: 0.8rem; }
+
+  .week-row {
+    display: flex;
+    gap: 6px;
+    padding: 8px 12px;
+    overflow-x: auto;
+  }
+  .day-chip {
+    background: white;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    padding: 6px 10px;
+    text-align: center;
+    min-width: 44px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .day-chip .day-label { font-size: 0.65rem; color: #888; font-weight: 600; }
+  .day-chip .day-num { font-size: 1rem; font-weight: 800; color: #1a1a2e; }
+  .day-chip.today { border-color: #e94560; background: #e94560; }
+  .day-chip.today .day-label, .day-chip.today .day-num { color: white; }
+  .day-chip.past { background: #f5f5f5; }
+  .day-chip.past .day-num { color: #aaa; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🌿 Chandru's Skin Routine</h1>
+  <p>Dr. Shwetha Rahul · Hydra Dermatology · Sebomelanosis</p>
+</header>
+
+<div class="date-nav">
+  <button onclick="changeDay(-1)">◀</button>
+  <div id="dateDisplay"></div>
+  <button onclick="changeDay(1)">▶</button>
+</div>
+
+<div class="week-row" id="weekRow"></div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('morning')">☀️ Morning</div>
+  <div class="tab" onclick="switchTab('night')">🌙 Night</div>
+  <div class="tab" onclick="switchTab('tablets')">💊 Tablets</div>
+  <div class="tab" onclick="switchTab('body')">🧴 Body</div>
+  <div class="tab" onclick="switchTab('hair')">💇 Hair</div>
+  <div class="tab" onclick="switchTab('wellness')">💧 Water</div>
+</div>
+
+<!-- MORNING TAB -->
+<div class="tab-content active" id="tab-morning">
+  <div class="progress-bar-wrap">
+    <div class="progress-label">Today's Morning Progress</div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-morning" style="width:0%"></div></div>
+    <div class="progress-count" id="count-morning">0 / 0 done</div>
+  </div>
+
+  <div id="morning-items"></div>
+</div>
+
+<!-- NIGHT TAB -->
+<div class="tab-content" id="tab-night">
+  <div class="progress-bar-wrap">
+    <div class="progress-label">Tonight's Routine Progress</div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-night" style="width:0%"></div></div>
+    <div class="progress-count" id="count-night">0 / 0 done</div>
+  </div>
+  <div id="night-items"></div>
+</div>
+
+<!-- TABLETS TAB -->
+<div class="tab-content" id="tab-tablets">
+  <div class="note-box">
+    <strong>⚠️ Treatment Duration: 2 Months</strong>
+    Started: 7 Apr 2026 → End by: ~7 Jun 2026<br>
+    Check with doctor for refill if still ongoing.
+  </div>
+  <div id="tablet-items"></div>
+</div>
+
+<!-- BODY TAB -->
+<div class="tab-content" id="tab-body">
+  <div id="body-items"></div>
+</div>
+
+<!-- HAIR TAB -->
+<div class="tab-content" id="tab-hair">
+  <div id="hair-items"></div>
+  <div class="note-box">
+    <strong>💡 Shampoo Days This Week</strong>
+    <span id="shampoo-days-text"></span>
+  </div>
+</div>
+
+<!-- WELLNESS TAB -->
+<div class="tab-content" id="tab-wellness">
+
+  <!-- Water Tracker -->
+  <div style="background:white;margin:8px 12px;border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+    <div style="font-size:0.7rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#0f3460;margin-bottom:10px;">💧 Daily Water Goal — 4 Litres</div>
+    <div style="display:flex;justify-content:center;align-items:flex-end;gap:6px;flex-wrap:wrap;" id="glassGrid"></div>
+    <div style="margin-top:12px;">
+      <div style="font-size:0.75rem;color:#555;margin-bottom:5px;">Progress</div>
+      <div style="height:12px;background:#e8f4fd;border-radius:10px;overflow:hidden;">
+        <div id="waterFill" style="height:100%;background:linear-gradient(90deg,#3498db,#0f3460);border-radius:10px;transition:width 0.4s;width:0%"></div>
+      </div>
+      <div id="waterCount" style="font-size:0.9rem;font-weight:800;color:#0f3460;margin-top:5px;text-align:center;">0 / 4000 ml</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;justify-content:center;">
+      <button onclick="addWater(250)" style="background:#e8f4fd;border:2px solid #3498db;color:#0f3460;padding:6px 14px;border-radius:20px;font-weight:700;cursor:pointer;font-size:0.8rem;">+250ml</button>
+      <button onclick="addWater(500)" style="background:#3498db;border:none;color:white;padding:6px 14px;border-radius:20px;font-weight:700;cursor:pointer;font-size:0.8rem;">+500ml</button>
+      <button onclick="addWater(-250)" style="background:#fff0f0;border:2px solid #e94560;color:#e94560;padding:6px 14px;border-radius:20px;font-weight:700;cursor:pointer;font-size:0.8rem;">−250ml</button>
+    </div>
+    <div style="font-size:0.7rem;color:#888;text-align:center;margin-top:8px;">Each 💧 = 250ml · Tap to add/remove</div>
+  </div>
+
+  <!-- Water tip -->
+  <div class="note-box" style="border-left-color:#3498db;background:#e8f4fd;color:#1a4a7a;">
+    <strong>💡 Water Tips for Skin</strong>
+    Try to drink a glass after waking up, before each meal, and before sleep. Spread 4L throughout the day — don't drink all at once!
+  </div>
+
+  <!-- Coconut Oil -->
+  <div style="background:white;margin:8px 12px;border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+    <div style="font-size:0.7rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#0f3460;margin-bottom:10px;">🥥 Coconut Oil — Hair Use</div>
+
+    <div class="card" style="margin:0 0 8px;background:#fffbf0;border-left:4px solid #e67e22;" onclick="toggleCheck('coco_'+dateKey(currentDate), this)">
+      <div class="checkbox" style="border-color:#e67e22;"></div>
+      <div class="card-body">
+        <div class="card-name" style="color:#a04000;">🥥 Coconut Oil Pre-Wash</div>
+        <span class="card-freq orange">Night Before Shampoo Day</span>
+        <div class="card-inst">Apply warm coconut oil on scalp + hair the night before shampoo day (Tue night & Fri night). Massage gently 5–10 mins. Leave overnight. Wash off with Saldan shampoo next morning.</div>
+      </div>
+    </div>
+
+    <div class="note-box" style="margin:8px 0 0;border-left-color:#e67e22;background:#fff8ee;color:#7d4500;">
+      <strong>📅 Coconut Oil Schedule</strong>
+      Shampoo days = Wed & Sat<br>
+      → So apply coconut oil on <strong>Tuesday night</strong> & <strong>Friday night</strong><br><br>
+      ⚠️ Don't apply coconut oil on the same night as Brilante/Lumacip/Deriva — those are your alternate night actives. Coconut oil is only for scalp/hair, not face.
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let waterMl = 0;
+
+  function renderGlasses() {
+    const total = 16; // 16 x 250ml = 4000ml
+    const filled = Math.min(Math.floor(waterMl / 250), total);
+    let html = '';
+    for (let i = 0; i < total; i++) {
+      const isFull = i < filled;
+      html += `<div onclick="addWater(${isFull ? -250 : 250})" style="font-size:1.5rem;cursor:pointer;opacity:${isFull ? '1' : '0.25'};transition:opacity 0.2s;">💧</div>`;
+    }
+    document.getElementById('glassGrid').innerHTML = html;
+    const pct = Math.min(Math.round((waterMl / 4000) * 100), 100);
+    document.getElementById('waterFill').style.width = pct + '%';
+    document.getElementById('waterCount').textContent = waterMl + ' / 4000 ml  (' + pct + '%)';
+    if (waterMl >= 4000) {
+      document.getElementById('waterCount').textContent = '🎉 Goal reached! 4000ml done!';
+      document.getElementById('waterCount').style.color = '#27ae60';
+    } else {
+      document.getElementById('waterCount').style.color = '#0f3460';
+    }
+  }
+
+  function addWater(ml) {
+    waterMl = Math.max(0, Math.min(4000, waterMl + ml));
+    renderGlasses();
+  }
+
+  renderGlasses();
+</script>
+
+<script>
+  // State
+  function getTodayLocal() {
+    const n = new Date();
+    return new Date(n.getFullYear(), n.getMonth(), n.getDate());
+  }
+  let currentDate = getTodayLocal();
+  const startDate = new Date(2026, 3, 7); // Apr 7 2026
+  const endDate = new Date(2026, 5, 7);   // Jun 7 2026
+  const checkedItems = {}; // key: "YYYY-MM-DD_itemId"
+
+  function dateKey(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + day;
+  }
+
+  function itemKey(d, id) {
+    return dateKey(d) + '_' + id;
+  }
+
+  function getDayOfWeek(d) {
+    // 0=Sun,1=Mon,...,6=Sat
+    return d.getDay();
+  }
+
+  function isAlternateNight(d) {
+    // Count nights from Apr 7 (start night 1 = odd)
+    const diff = Math.floor((d - startDate) / 86400000);
+    return diff % 2 === 0; // even diff = Brilante+Lumacip; odd = Deriva
+  }
+
+  function isShampooDay(d) {
+    // Twice a week: Wednesday and Saturday
+    const dow = getDayOfWeek(d);
+    return dow === 3 || dow === 6; // Wed or Sat
+  }
+
+  function isTodayOrFuture(d) {
+    return d >= getTodayLocal();
+  }
+
+  const morningItems = [
+    { id: 'm1', name: 'BRILANTE INTENSE BRIGHTENING CLEANSER', freq: 'Every Morning', freqClass: 'blue',
+      inst: 'Wash face. Don\'t rub excessively. Pat dry with soft towel.' },
+    { id: 'm2', name: 'AQUAHANCE MOISTURE SURGE GEL', freq: 'Every Morning', freqClass: 'blue',
+      inst: 'After facewash, pat dry and apply all over the face.' },
+    { id: 'm3', name: 'UVSKRIN H2O SS SPF50 50GM', freq: 'Every Morning (Sunscreen)', freqClass: 'orange',
+      inst: 'Apply over face and exposed body parts 15 mins before sun exposure. Repeat every 3 hours if outdoors.' },
+    { id: 'm4', name: 'TABLET DIGIGLO FORTE', freq: 'Morning Only (1-0-0)', freqClass: 'green',
+      inst: 'After breakfast. Dissolve 1 tablet in a glass of water and drink.' },
+    { id: 'm5', name: 'TABLET C-WIZ', freq: 'Morning Only (1-0-0)', freqClass: 'green',
+      inst: 'After breakfast.' },
+    { id: 'm6', name: 'SOLECROSS SUN BLOCK LOTION (Body)', freq: 'Every Morning', freqClass: 'orange',
+      inst: 'Apply over face and other exposed body parts 15 mins before sun exposure. Repeat every 4 hours if outdoors.' },
+    { id: 'm7', name: 'HYDRONIC MOISTURZING LOTION (Body)', freq: 'Morning + Night (1-0-1)', freqClass: 'blue',
+      inst: 'After bath, pat dry and apply all over the body.' },
+  ];
+
+  function getNightItems(d) {
+    const diff = Math.floor((d - startDate) / 86400000);
+    const nightNum = (diff % 2) + 1;
+    const isBrilanteNight = (diff % 2 === 0);
+
+    const items = [
+      { id: 'n1', name: 'BRILANTE INTENSE BRIGHTENING CLEANSER', freq: 'Every Night — Step 1', freqClass: 'blue',
+        inst: 'Wash face first. Don\'t rub excessively. Pat dry with soft towel.' },
+      { id: 'n2', name: 'AQUAHANCE MOISTURE SURGE GEL', freq: 'Every Night — Step 2 (Moisturizer)', freqClass: 'blue',
+        inst: 'After facewash, pat dry and apply all over the face.' },
+      { id: 'n3', name: 'HYDRONIC MOISTURZING LOTION (Body)', freq: 'Every Night (Body)', freqClass: 'blue',
+        inst: 'Apply all over the body.' },
+    ];
+
+    if (isBrilanteNight) {
+      items.push({ id: 'n4', name: 'BRILANTE MAX SERUM', freq: 'Night ' + nightNum + ' of 2 — Brightening Night 🌟', freqClass: 'purple',
+        inst: 'Step 3a: Apply over full face after facewash + moisturizer. Apply this FIRST before Lumacip.' });
+      items.push({ id: 'n5', name: 'LUMACIP H.Q CREAM', freq: 'Night ' + nightNum + ' of 2 — Brightening Night 🌟', freqClass: 'purple',
+        inst: 'Step 3b: Apply over full face after Brilante Serum. Both used on same brightening night.' });
+    } else {
+      items.push({ id: 'n6', name: 'DERIVA CMS GEL', freq: 'Night ' + nightNum + ' of 2 — Acne Spot Night 🎯', freqClass: 'purple',
+        inst: 'Step 3: Spot apply lightly on pimple areas only (cheeks/chin/forehead). Avoid eyes/nose/mouth. Apply after moisturizer.' });
+    }
+
+    return items;
+  }
+
+  const bodyItems = [
+    { id: 'b1', name: 'HYDRONIC MOISTURZING LOTION', freq: 'Morning & Night (1-0-1)', freqClass: 'blue',
+      inst: 'After bath, pat dry and apply all over the body.' },
+    { id: 'b2', name: 'SOLECROSS SUN BLOCK LOTION', freq: 'Every Morning', freqClass: 'orange',
+      inst: 'Apply over face and exposed body parts 15 mins before sun. Repeat every 4 hours if outdoors.' },
+    { id: 'b3', name: 'SKINFAY MOISTURIZING BAR', freq: 'For Bath (Daily)', freqClass: 'blue',
+      inst: 'Use as soap/bar during bath.' },
+  ];
+
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  function getHairItems(d) {
+    const isShampoo = isShampooDay(d);
+    const dow = getDayOfWeek(d);
+    const dayName = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][dow];
+    const items = [];
+
+    if (isShampoo) {
+      items.push({ id: 'h1', name: 'SALDAN SHAMPOO', freq: dayName + ' = Shampoo Day! 🧖', freqClass: 'purple',
+        inst: 'Apply on wet scalp, gently massage 1-2 mins, soak lather for 10 mins, rinse.' });
+      items.push({ id: 'h2', name: 'FOLKLEEN MOISTURIZING SHAMPOO', freq: dayName + ' = Shampoo Day! 🧖', freqClass: 'purple',
+        inst: 'Use after Saldan for regular hair wash.' });
+      items.push({ id: 'h3', name: 'REJUHAIR SERUM', freq: 'On Wash Days Only 💧', freqClass: 'blue',
+        inst: 'Apply on damp hair after washing. Leave-on serum for hair only. Do NOT apply on scalp.' });
+    } else {
+      items.push({ id: 'h0', name: 'No hair products today', freq: 'Next shampoo: ' + getNextShampooDay(d), freqClass: 'orange',
+        inst: 'Shampoo + Serum only on Wednesday & Saturday. Rest days — no hair products needed.' });
+    }
+    return items;
+  }
+
+  function getNextShampooDay(d) {
+    let next = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    for (let i = 1; i <= 7; i++) {
+      next = new Date(next.getFullYear(), next.getMonth(), next.getDate() + 1);
+      if (isShampooDay(next)) {
+        const dayLabel = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][next.getDay()];
+        return dayLabel + ' ' + next.getDate() + ' ' + monthNames[next.getMonth()];
+      }
+    }
+    return '?';
+  }
+
+  function getThisWeekShampooDays(d) {
+    // Get the Wed and Sat of the current week (week starts Monday)
+    const dow = d.getDay(); // 0=Sun
+    // Find Monday of this week
+    const mondayOffset = dow === 0 ? -6 : 1 - dow;
+    const monday = new Date(d.getFullYear(), d.getMonth(), d.getDate() + mondayOffset);
+    // Wed = monday + 2, Sat = monday + 5
+    const wed = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 2);
+    const sat = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 5);
+    const fmt = (dt) => ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt.getDay()] + ' ' + dt.getDate() + ' ' + monthNames[dt.getMonth()];
+    return 'This week: ' + fmt(wed) + ' & ' + fmt(sat);
+  }
+
+  function makeCard(item, date) {
+    const key = itemKey(date, item.id);
+    const done = checkedItems[key] || false;
+    return `
+      <div class="card ${done ? 'done' : ''}" id="card-${key}" onclick="toggleCheck('${key}', this)">
+        <div class="checkbox">${done ? '✓' : ''}</div>
+        <div class="card-body">
+          <div class="card-name">${item.name}</div>
+          <span class="card-freq ${item.freqClass || ''}">${item.freq}</span>
+          <div class="card-inst">${item.inst}</div>
+        </div>
+      </div>`;
+  }
+
+  function makePillCard(item, date) {
+    const key = itemKey(date, item.id);
+    const done = checkedItems[key] || false;
+    return `
+      <div class="card pill-card ${done ? 'done' : ''}" id="card-${key}" onclick="toggleCheck('${key}', this)">
+        <div class="checkbox">${done ? '✓' : ''}</div>
+        <div class="card-body">
+          <div class="card-name pill-name">💊 ${item.name}</div>
+          <span class="duration-badge">${item.duration}</span>
+          <div class="card-inst">${item.inst}</div>
+        </div>
+      </div>`;
+  }
+
+  function toggleCheck(key, cardEl) {
+    checkedItems[key] = !checkedItems[key];
+    const cb = cardEl.querySelector('.checkbox');
+    if (checkedItems[key]) {
+      cardEl.classList.add('done');
+      cb.textContent = '✓';
+    } else {
+      cardEl.classList.remove('done');
+      cb.textContent = '';
+    }
+    updateProgress();
+  }
+
+  function updateProgress() {
+    updateSectionProgress('morning', morningItems);
+    const nightItems = getNightItems(currentDate);
+    updateSectionProgress('night', nightItems);
+  }
+
+  function updateSectionProgress(section, items) {
+    const total = items.length;
+    let done = 0;
+    items.forEach(item => {
+      if (checkedItems[itemKey(currentDate, item.id)]) done++;
+    });
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    document.getElementById('progress-' + section).style.width = pct + '%';
+    document.getElementById('count-' + section).textContent = `${done} / ${total} done`;
+  }
+
+  function renderDay() {
+    const dk = dateKey(currentDate);
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const dow = getDayOfWeek(currentDate);
+    document.getElementById('dateDisplay').textContent =
+      days[dow] + ', ' + currentDate.getDate() + ' ' + months[currentDate.getMonth()] + ' ' + currentDate.getFullYear();
+
+    // Morning
+    let mHTML = '';
+    mHTML += `<div class="section-title">Face</div>`;
+    morningItems.slice(0, 3).forEach(i => mHTML += makeCard(i, currentDate));
+    mHTML += `<div class="section-title">Tablets (Morning)</div>`;
+    morningItems.slice(3, 5).forEach(i => mHTML += makeCard(i, currentDate));
+    mHTML += `<div class="section-title">Body</div>`;
+    morningItems.slice(5).forEach(i => mHTML += makeCard(i, currentDate));
+    document.getElementById('morning-items').innerHTML = mHTML;
+
+    const nightItems = getNightItems(currentDate);
+    const diff = Math.floor((currentDate - startDate) / 86400000);
+    const isBrilanteNight = (diff % 2 === 0);
+    let nHTML = '';
+    nHTML += `<div class="section-title">Face Wash First</div>`;
+    nHTML += makeCard(nightItems[0], currentDate);
+    nHTML += `<div class="section-title">Moisturizer</div>`;
+    nHTML += makeCard(nightItems[1], currentDate);
+    nHTML += `<div class="section-title">Body</div>`;
+    nHTML += makeCard(nightItems[2], currentDate);
+    nHTML += `<div class="section-title">Actives Tonight (${isBrilanteNight ? 'Brightening Night 🌟' : 'Acne Spot Night 🎯'})</div>`;
+    nightItems.slice(3).forEach(i => nHTML += makeCard(i, currentDate));
+    if (isBrilanteNight) {
+      nHTML += `<div class="note-box"><strong>Tonight: Brightening Night 🌟</strong>Brilante Serum first → then Lumacip HQ Cream. Both on full face after moisturizer. Tomorrow night = Deriva only.</div>`;
+    } else {
+      nHTML += `<div class="note-box"><strong>Tonight: Acne Spot Night 🎯</strong>Deriva CMS Gel on pimple spots only. Avoid eyes/nose/mouth. Apply after moisturizer. Tomorrow night = Brilante + Lumacip.</div>`;
+    }
+    document.getElementById('night-items').innerHTML = nHTML;
+
+    // Tablets
+    const tabletData = [
+      { id: 't1', name: 'TABLET DIGIGLO FORTE', duration: '2 Months (60 tablets)', inst: 'After food, morning only. Dissolve 1 tablet in a glass of water and drink.' },
+      { id: 't2', name: 'TABLET C-WIZ', duration: '2 Months (60 tablets)', inst: 'After food, morning only.' },
+    ];
+    let tHTML = `<div class="section-title">Daily Tablets (Morning)</div>`;
+    tabletData.forEach(i => tHTML += makePillCard(i, currentDate));
+    document.getElementById('tablet-items').innerHTML = tHTML;
+
+    // Body
+    let bHTML = '';
+    bHTML += `<div class="section-title">Bath</div>`;
+    bHTML += makeCard(bodyItems[2], currentDate);
+    bHTML += `<div class="section-title">After Bath (Morning & Night)</div>`;
+    bHTML += makeCard(bodyItems[0], currentDate);
+    bHTML += `<div class="section-title">Sun Protection (Morning)</div>`;
+    bHTML += makeCard(bodyItems[1], currentDate);
+    document.getElementById('body-items').innerHTML = bHTML;
+
+    // Hair
+    const hairItems = getHairItems(currentDate);
+    let hHTML = '';
+    hHTML += `<div class="section-title">Scalp & Hair</div>`;
+    hairItems.forEach(i => hHTML += makeCard(i, currentDate));
+    document.getElementById('hair-items').innerHTML = hHTML;
+
+    // Shampoo days this week - dynamic
+    document.getElementById('shampoo-days-text').textContent = 'Every Wednesday & Saturday. ' + getThisWeekShampooDays(currentDate);
+
+    updateProgress();
+    renderWeek();
+  }
+
+  function renderWeek() {
+    const wr = document.getElementById('weekRow');
+    let html = '';
+    const today = getTodayLocal();
+    // Show 7 days: 3 before current, current, 3 after
+    for (let i = -3; i <= 3; i++) {
+      const d = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + i);
+      const isToday = dateKey(d) === dateKey(today);
+      const isCurrent = dateKey(d) === dateKey(currentDate);
+      const isPast = d < today && !isToday;
+      const days = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+      const cls = isCurrent ? 'today' : (isPast ? 'past' : '');
+      html += `<div class="day-chip ${cls}" onclick="goToDate('${dateKey(d)}')">
+        <div class="day-label">${days[d.getDay()]}</div>
+        <div class="day-num">${d.getDate()}</div>
+      </div>`;
+    }
+    wr.innerHTML = html;
+  }
+
+  function goToDate(dk) {
+    const parts = dk.split('-');
+    currentDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+    renderDay();
+  }
+
+  function changeDay(delta) {
+    currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + delta);
+    renderDay();
+  }
+
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach((t, i) => {
+      const names = ['morning','night','tablets','body','hair','wellness'];
+      t.classList.toggle('active', names[i] === name);
+    });
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+  }
+
+  // Init
+  renderDay();
+</script>
+</body>
+</html>
